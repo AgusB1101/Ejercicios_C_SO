@@ -4,11 +4,17 @@
 int length(const char *);
 char *copy(char *);
 char *string_concat(const char *, const char *);
+void string_concat_dynamic(const char *, const char *, char **);
 
 int main()
 {
   char *result = string_concat("Agustin ", "Bernal");
   printf("%s\n", result);
+
+  char *saludo;
+
+  string_concat_dynamic("Hola ", result, &saludo);
+  printf("%s\n", saludo);
 }
 
 int length(const char *str)
@@ -41,4 +47,9 @@ char *string_concat(const char *str1, const char *str2)
   sprintf(result, "%s%s", str1, str2);
 
   return result;
+}
+
+void string_concat_dynamic(const char *str1, const char *str2, char **buffer)
+{
+  *buffer = copy(string_concat(str1, str2));
 }
