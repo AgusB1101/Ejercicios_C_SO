@@ -7,51 +7,49 @@ char *string_concat(const char *, const char *);
 void string_concat_dynamic(const char *, const char *, char **);
 char *char_to_string(char);
 void mail_split(const char *, char **, char **);
+char **string_split(const char *, char);
+int character_index(const char *, char);
 
 int main()
 {
-  char *result = string_concat("Agustin ", "Bernal");
-  printf("%s\n", result);
+  char *concatenatedString = string_concat("Agustin ", "Bernal");
+  printf("%s\n", concatenatedString);
 
-  char *saludo;
-
-  string_concat_dynamic("Hola ", result, &saludo);
-  printf("%s\n", saludo);
+  char *greeting;
+  string_concat_dynamic("Hola ", concatenatedString, &greeting);
+  printf("%s\n", greeting);
 
   char *mail = "ritchie@ansic.com.ar";
   char *user;
-  char *dom;
-  mail_split(mail, &user, &dom);
+  char *domain;
+  mail_split(mail, &user, &domain);
 
-  printf("User: %s\tDom:%s\n", user, dom);
+  printf("User: %s\tDom:%s\n", user, domain);
 }
 
-int length(const char *str)
+int length(const char *string)
 {
-  short i = 0;
+  short index = 0;
 
-  while (str[i] != '\0')
-    i++;
+  while (string[index] != '\0')
+    index++;
 
-  return i;
+  return index;
 }
 
-char *copy(char *str)
+char *copy(char *string)
 {
-  char *tmp = malloc(sizeof(char) * length(str) + 1);
-  sprintf(tmp, "%s", str);
-  tmp[length(str)] = '\0';
-  return tmp;
+  char *result = malloc(sizeof(char) * length(string) + 1);
+  sprintf(result, "%s", string);
+  result[length(string)] = '\0';
+  return result;
 }
 
 char *string_concat(const char *str1, const char *str2)
 {
+  int combinedLength = length(str1) + length(str2) + 1;
 
-  int len1 = length(str1);
-  int len2 = length(str2);
-  int lenResult = len1 + len2 + 1;
-
-  char *result = malloc(sizeof(char) * lenResult);
+  char *result = malloc(sizeof(char) * combinedLength);
 
   sprintf(result, "%s%s", str1, str2);
 
@@ -63,36 +61,49 @@ void string_concat_dynamic(const char *str1, const char *str2, char **buffer)
   *buffer = copy(string_concat(str1, str2));
 }
 
-char *char_to_string(char c)
+char *char_to_string(char character)
 {
-  char *tmp = malloc(sizeof(char) * 2);
-  sprintf(tmp, "%c", c);
+  char *string = malloc(sizeof(char) * 2);
+  sprintf(string, "%c", character);
 
-  return tmp;
+  return string;
 }
 
-void mail_split(const char *mail, char **user, char **dom)
+void mail_split(const char *mail, char **user, char **domain)
 {
-  char **temp = malloc(sizeof(char *) * 2);
-  temp[0] = "";
-  temp[1] = "";
+  char **mailParts = string_split(mail, '@');
 
-  int i = 0;
+  *user = copy(mailParts[0]);
+  *domain = copy(mailParts[1]);
+}
 
-  while (mail[i] != '@')
+char **string_split(const char *string, char character)
+{
+  int sizeOfString = sizeof(char *) * 2;
+  char **parts = malloc(sizeOfString);
+  parts[0] = "";
+  parts[1] = "";
+  int dividerIndex = character_index(string, character);
+  for (int index = 0; index < length(string); index++)
   {
-    string_concat_dynamic(temp[0], char_to_string(mail[i]), &temp[0]);
-    i++;
+
+    char* letter = char_to_string(string[index]);
+
+    if (index < dividerIndex)
+      string_concat_dynamic(parts[0], letter, &parts[0]);
+    else if (index > dividerIndex)
+      string_concat_dynamic(parts[1], letter, &parts[1]);
   }
 
-  i++;
+  return parts;
+}
 
-  while (mail[i] != '\0')
-  {
-    string_concat_dynamic(temp[1], char_to_string(mail[i]), &temp[1]);
-    i++;
-  }
+int character_index(const char *string, char character)
+{
+  int index = 0;
 
-  *user = copy(temp[0]);
-  *dom = copy(temp[1]);
+  while (string[index] != character)
+    index++;
+
+  return index;
 }
