@@ -5,14 +5,20 @@
 
 void removeLastLineFeed(char *);
 char *getLine(FILE *);
+int occurrencesOfChar(char *, char);
+int fieldsAmount(char *);
+char **getFields(char *);
 
 int main()
 {
 
   FILE *inputFile = fopen("Personas.txt", "r");
 
-  while (!feof(inputFile))
-    printf("%s\n", getLine(inputFile));
+  char *line = getLine(inputFile);
+  char **personFields = getFields(line);
+
+  for (int i = 0; i < fieldsAmount(line); i++)
+    puts(personFields[i]);
 
   txt_close_file(inputFile);
 
@@ -34,4 +40,25 @@ char *getLine(FILE *file)
   removeLastLineFeed(line);
 
   return line;
+}
+
+int occurrencesOfChar(char *string, char character)
+{
+  int counter = 0;
+
+  for (int i = 0; i < string_length(string); i++)
+    if (string[i] == character)
+      counter++;
+
+  return counter;
+}
+
+int fieldsAmount(char *string)
+{
+  return occurrencesOfChar(string, ';') + 1;
+}
+
+char **getFields(char *string)
+{
+  return string_n_split(string, fieldsAmount(string), "; ");
 }
