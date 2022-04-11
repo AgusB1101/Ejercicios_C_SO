@@ -3,11 +3,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef struct
+{
+  char *region;
+  char *fullName;
+  int age;
+  char *phoneNumber;
+  char *id;
+  long balance;
+} Person;
+
 void removeLastLineFeed(char *);
 char *getLine(FILE *);
 int occurrencesOfChar(char *, char);
 int fieldsAmount(char *);
 char **getFields(char *);
+void fillPersonWithFields(Person *, char **);
+void initPerson(Person *);
+void showPersonFields(Person);
 
 int main()
 {
@@ -17,8 +30,13 @@ int main()
   char *line = getLine(inputFile);
   char **personFields = getFields(line);
 
-  for (int i = 0; i < fieldsAmount(line); i++)
-    puts(personFields[i]);
+  Person person;
+
+  initPerson(&person);
+
+  fillPersonWithFields(&person, personFields);
+
+  showPersonFields(person);
 
   txt_close_file(inputFile);
 
@@ -61,4 +79,29 @@ int fieldsAmount(char *string)
 char **getFields(char *string)
 {
   return string_n_split(string, fieldsAmount(string), "; ");
+}
+
+void fillPersonWithFields(Person *person, char **fields)
+{
+  person->region = string_duplicate(fields[0]);
+  person->fullName = string_duplicate(fields[1]);
+  person->age = atoi(fields[2]);
+  person->phoneNumber = string_duplicate(fields[3]);
+  person->id = string_duplicate(fields[4]);
+  person->balance = atol(fields[5]);
+}
+
+void initPerson(Person *person)
+{
+  person->region = string_new();
+  person->fullName = string_new();
+  person->age = 0;
+  person->phoneNumber = string_new();
+  person->id = string_new();
+  person->balance = 0;
+}
+
+void showPersonFields(Person person)
+{
+  printf("%s | %d | %s | %.30s | %s\n", person.region, person.age, person.id, person.fullName, person.phoneNumber);
 }
