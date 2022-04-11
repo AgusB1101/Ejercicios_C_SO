@@ -20,7 +20,7 @@ int fieldsAmount(char *);
 char **getFields(char *);
 void fillPersonWithFields(Person *, char **);
 void initPerson(Person *);
-void showPersonFields(Person);
+char *personToString(Person);
 
 int main()
 {
@@ -33,10 +33,9 @@ int main()
   Person person;
 
   initPerson(&person);
-
   fillPersonWithFields(&person, personFields);
 
-  showPersonFields(person);
+  puts(personToString(person));
 
   txt_close_file(inputFile);
 
@@ -101,7 +100,7 @@ void initPerson(Person *person)
   person->balance = 0;
 }
 
-void showPersonFields(Person person)
+char *personToString(Person person)
 {
-  printf("%s | %d | %s | %.30s | %s\n", person.region, person.age, person.id, person.fullName, person.phoneNumber);
+  return string_from_format("%s | %d | %s | %.30s | %s", person.region, person.age, person.id, person.fullName, person.phoneNumber);
 }
