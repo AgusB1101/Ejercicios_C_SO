@@ -94,8 +94,6 @@ char **string_split(const char *string, char character)
     else if (index > dividerIndex)
       string_concat_dynamic(parts[1], letter, &parts[1]);
   }
-
-  return parts;
 }
 
 int character_index(const char *string, char character)
