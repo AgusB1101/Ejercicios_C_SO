@@ -3,34 +3,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-char *char_to_string(char);
-char *getFileText(FILE *);
+void removeLastLineFeed(char *);
+char *getLine(FILE *);
 
 int main()
 {
 
   FILE *inputFile = fopen("Personas.txt", "r");
 
-  char *fileText = getFileText(inputFile);
-
-  printf("%s\n", fileText);
+  while (!feof(inputFile))
+    printf("%s\n", getLine(inputFile));
 
   txt_close_file(inputFile);
 
   return 0;
 }
 
-char *char_to_string(char character)
+void removeLastLineFeed(char *text)
 {
-  return string_from_format("%c", character);
+  if (text[string_length(text) - 1] == '\n')
+    text[string_length(text) - 2] = '\0';
 }
 
-char *getFileText(FILE *file)
+char *getLine(FILE *file)
 {
-  char *fileText = string_new();
+  char *line = string_new();
+  int bufSize = 0;
+  int lineSize = getline(&line, &bufSize, file);
 
-  while (!feof(file))
-    string_append(&fileText, char_to_string(fgetc(file)));
+  removeLastLineFeed(line);
 
-  return fileText;
+  return line;
 }
