@@ -1,9 +1,11 @@
-#include "commons/string.h"
-#include "commons/txt.h"
 #include <stdio.h>
 #include <stdlib.h>
-
-typedef struct
+#include <string.h>
+#include "commons/log.h"
+#include "commons/string.h"
+#include "commons/txt.h"
+#include "commons/collections/list.h"
+typedef struct Person
 {
   char *region;
   char *fullName;
@@ -20,24 +22,45 @@ int fieldsAmount(char *);
 char **getFields(char *);
 void fillPersonWithFields(Person *, char **);
 void initPerson(Person *);
-char *personToString(Person);
+char *personToString(Person *);
+void writePeopleInFile(t_list *);
+bool orderByRegion(void *, void *);
+bool orderByAge(void *, void *);
+bool orderByRegionAndAge(void *, void *);
+t_log *initLogger();
+void terminateProgram(t_log *, t_list *);
 
 int main()
 {
 
   FILE *inputFile = fopen("Personas.txt", "r");
 
-  char *line = getLine(inputFile);
-  char **personFields = getFields(line);
+  t_log *logger = initLogger();
+  t_list *people = list_create();
 
-  Person person;
+  while (!feof(inputFile))
+  {
+    char *line = getLine(inputFile);
+    char **personFields = getFields(line);
 
-  initPerson(&person);
-  fillPersonWithFields(&person, personFields);
+    Person *person = malloc(sizeof(Person *));
+    initPerson(person);
+    fillPersonWithFields(person, personFields);
 
-  puts(personToString(person));
+    if (person->age >= 18)
+    {
+      list_add(people, person);
+      if (person->balance < 100)
+        log_info(logger, (const char *)personToString(person));
+    }
+    else
+      continue;
+  }
 
-  txt_close_file(inputFile);
+  list_sort(people, &orderByRegionAndAge);
+  writePeopleInFile(people);
+
+  terminateProgram(inputFile, logger, people);
 
   return 0;
 }
@@ -100,7 +123,51 @@ void initPerson(Person *person)
   person->balance = 0;
 }
 
-char *personToString(Person person)
+char *personToString(Person *person)
 {
-  return string_from_format("%s | %d | %s | %.30s | %s", person.region, person.age, person.id, person.fullName, person.phoneNumber);
+  return string_from_format("%s | %d | %s | %.30s | %s\n", person->region, person->age, person->id, person->fullName, person->phoneNumber);
+}
+
+void writePeopleInFile(t_list *people)
+{
+  FILE *outputFile = txt_open_for_append("Salida.txt");
+
+  for (int i = 0; i < list_size(people); i++)
+  {
+    Person *person = (Person *)list_get(people, i);
+    txt_write_in_file(outputFile, personToString(person));
+  }
+
+  txt_close_file(outputFile);
+}
+
+bool orderByRegion(void *person, void *otherPerson)
+{
+  return strcmp(((Person *)person)->region, ((Person *)otherPerson)->region) <= 0;
+}
+
+bool orderByAge(void *person, void *otherPerson)
+{
+  return ((Person *)person)->age < ((Person *)otherPerson)->age;
+}
+
+bool orderByRegionAndAge(void *person, void *otherPerson)
+{
+  bool regionBool = orderByRegion(person, otherPerson);
+  if (!regionBool)
+    return orderByAge(person, otherPerson);
+  else
+    return regionBool;
+}
+
+t_log *initLogger()
+{
+  return log_create("Personas.log", "Persona", true, LOG_LEVEL_INFO);
+}
+
+void terminateProgram(FILE *file, t_log *logger, t_list *list)
+{
+  log_destroy(logger);
+  list_destroy(list);
+  txt_close_file(file);
 }
